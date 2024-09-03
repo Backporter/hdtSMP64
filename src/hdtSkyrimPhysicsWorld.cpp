@@ -1,6 +1,4 @@
 #include "hdtSkyrimPhysicsWorld.h"
-#include <ppl.h>
-#include "Offsets.h"
 #include "PluginInterfaceImpl.h"
 
 namespace hdt

@@ -27,6 +27,7 @@
 #include <fstream>
 #include <d3d11.h>
 #include <clocale>
+#include <ppl.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <set>

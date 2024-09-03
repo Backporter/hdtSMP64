@@ -1,8 +1,6 @@
 #include "ActorManager.h"
-
 #include "Hooks.h"
 #include "HookEvents.h"
-#include "Offsets.h"
 
 //
 #include <xbyak/xbyak.h>

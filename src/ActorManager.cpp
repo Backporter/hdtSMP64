@@ -4,7 +4,6 @@
 #include "ActorManager.h"
 #include "hdtSkyrimPhysicsWorld.h"
 #include "hdtDefaultBBP.h"
-#include "Offsets.h"
 
 namespace hdt
 {

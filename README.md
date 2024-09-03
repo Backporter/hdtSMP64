@@ -176,25 +176,13 @@ The plugin recognizes the following optional parameters:
 ## Building
 ```
 #
-git clone https://github.com/Backporter/hdtSMP64.git
+git clone -b https://github.com/Backporter/hdtSMP64.git
 
 # 
 cd hdtSMP64
 
-# pull commonlib /extern to override the path settings
-git submodule init
-
 #
-cd extern/CommonLibSSE
-
-#
-git submodule init
-
-#
-git submodule update
-
-#
-cd ../../
+git submodule update --init --recursive
 
 #
 cmake --preset vs2022-windows-nocuda-avx2

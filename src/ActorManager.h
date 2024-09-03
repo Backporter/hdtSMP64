@@ -2,12 +2,8 @@
 
 #include "NetImmerseUtils.h"
 #include "FrameworkUtils.h"
-
 #include "hdtSkyrimSystem.h"
-
 #include "HookEvents.h"
-#include "Offsets.h"
-
 #include "DynamicHDT.h"
 
 namespace hdt
