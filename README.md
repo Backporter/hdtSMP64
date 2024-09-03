@@ -176,7 +176,7 @@ The plugin recognizes the following optional parameters:
 ## Building
 ```
 #
-git clone -b https://github.com/Backporter/hdtSMP64.git
+git clone -b test https://github.com/Backporter/hdtSMP64.git
 
 # 
 cd hdtSMP64
