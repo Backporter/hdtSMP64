@@ -196,24 +196,21 @@ git submodule update
 #
 cd ../../
 
-
-# Vaild Build Targets ->
-
-```
-vs2022-windows-nocuda
-vs2022-windows-nocuda-avx
-vs2022-windows-nocuda-avx2
-vs2022-windows-nocuda-avx512
-vs2022-windows-cuda
-vs2022-windows-cuda-avx
-vs2022-windows-cuda-avx2
-vs2022-windows-cuda-avx512
-```
+#
 cmake --preset vs2022-windows-nocuda-avx2
 
 #
 cmake --build build --config Release
 ```
+## Build Targets
+vs2022-windows-nocuda<br>
+vs2022-windows-nocuda-avx<br>
+vs2022-windows-nocuda-avx2<br>
+vs2022-windows-nocuda-avx512<br>
+vs2022-windows-cuda<br>
+vs2022-windows-cuda-avx<br>
+vs2022-windows-cuda-avx2<br>
+vs2022-windows-cuda-avx512
 
 ## Credits
 
