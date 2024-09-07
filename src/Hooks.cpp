@@ -1,6 +1,7 @@
 #include "ActorManager.h"
+
 #include "Hooks.h"
-#include "HookEvents.h"
+#include "Events.h"
 
 //
 #include <xbyak/xbyak.h>
@@ -15,10 +16,10 @@ namespace Hooks
 			RE::NiAVObject* headNode = a_this->GetObjectByName(headPart->formEditorID);
 			if (headNode) 
 			{
-				auto headGeo = headNode->AsTriShape();
-				if (headGeo) 
+				RE::BSGeometry* headGeometry = headNode->AsGeometry();
+				if (headGeometry)
 				{
-					SkinSingleGeometry__Hook(a_this, a_skeleton, headGeo, a_unk);
+					SkinSingleGeometry__Hook(a_this, a_skeleton, headGeometry, a_unk);
 				}
 			}
 
@@ -78,7 +79,7 @@ namespace Hooks
 		}
 	}
 
-	void BSFaceGenNiNodeHooks::SkinSingleGeometry__Hook(RE::BSFaceGenNiNode* const a_this, RE::NiNode* a_skeleton, RE::BSTriShape* a_triShape, bool a_unk)
+	void BSFaceGenNiNodeHooks::SkinSingleGeometry__Hook(RE::BSFaceGenNiNode* const a_this, RE::NiNode* a_skeleton, RE::BSGeometry* a_triShape, bool a_unk)
 	{
 		//
 		const char* name = "";
@@ -104,16 +105,16 @@ namespace Hooks
 		logger::debug("SkinSingleGeometry {} {} - {}, {}, (formid {:08x} base form {:08x} head template form {:08x})", a_skeleton->name.c_str(), a_skeleton->GetChildren().size(), a_triShape->name.c_str(), name, a_skeleton->GetUserData() ? a_skeleton->GetUserData()->formID : 0x0, a_skeleton->GetUserData() ? a_skeleton->GetUserData()->GetBaseObject()->formID : 0x0, formId);
 
 		//
-		hdt::SkinSingleHeadGeometryEvent e;
+		Events::SkinSingleHeadGeometryEvent e;
 		e.headNode = a_this;
 		e.skeleton = a_skeleton;
 		e.geometry = a_triShape;
 
 		//
-		hdt::g_skinSingleHeadGeometryEventDispatcher.SendEvent(&e);
+		Events::Sources::SkinSingleHeadGeometryEventSource::GetSingleton()->SendEvent(&e);
 	}
 
-	void BSFaceGenNiNodeHooks::SkinAllGeometry__Hook(RE::BSFaceGenNiNode* a_this, RE::NiNode* a_skeleton, bool a_unk)
+	void BSFaceGenNiNodeHooks::SkinAllGeometry__Hook(RE::BSFaceGenNiNode* const a_this, RE::NiNode* a_skeleton, bool a_unk)
 	{
 		//
 		const char* name = "";
@@ -139,11 +140,11 @@ namespace Hooks
 		logger::debug("SkinAllGeometry {} {}, {}, (formid {:08x} base form {:08x} head template form {:08x})", a_skeleton->name.c_str(), a_skeleton->GetChildren().size(), name, a_skeleton->GetUserData() ? a_skeleton->GetUserData()->formID : 0x0, a_skeleton->GetUserData() ? a_skeleton->GetUserData()->GetBaseObject()->formID : 0x0, formId);
 
 		//
-		hdt::SkinAllHeadGeometryEvent e;
+		Events::SkinAllHeadGeometryEvent e;
 		e.skeleton = a_skeleton;
 		e.headNode = a_this;
 
-		hdt::g_skinAllHeadGeometryEventDispatcher.SendEvent(&e);
+		Events::Sources::SkinAllHeadGeometryEventSource::GetSingleton()->SendEvent(&e);
 
 		//
 		if (REL::Module::IsAE())
@@ -159,10 +160,10 @@ namespace Hooks
 		e.hasSkinned = true;
 
 		//
-		hdt::g_skinAllHeadGeometryEventDispatcher.SendEvent(&e);
+		Events::Sources::SkinAllHeadGeometryEventSource::GetSingleton()->SendEvent(&e);
 	}
 
-	void BSFaceGenNiNodeHooks::SkinAllGeometry(RE::BSFaceGenNiNode* a_this, RE::NiNode* a_skeleton, bool a_unk)
+	void BSFaceGenNiNodeHooks::SkinAllGeometry(RE::BSFaceGenNiNode* const a_this, RE::NiNode* a_skeleton, bool a_unk)
 	{
 		if (a_skeleton)
 		{
@@ -227,7 +228,7 @@ namespace Hooks
 		localTrampoline.write_branch<5>(GeometrySkinningBoneFix.address(), localTrampoline.allocate(code));
 	}
 	
-	void MainHooks::Update(RE::Main* a_this)
+	void MainHooks::Update(RE::Main* const a_this)
 	{
 		//
 		_Update(a_this);
@@ -238,14 +239,14 @@ namespace Hooks
 		//
 		if (quitGame)
 		{
-			hdt::ShutdownEvent e;
-			hdt::g_shutdownEventDispatcher.SendEvent(&e);
+			Events::ShutdownEvent e;
+			Events::Sources::ShutdownEventEventSource::GetSingleton()->SendEvent(&e);
 		} 
 		else 
 		{
-			hdt::FrameEvent e;
+			Events::FrameEvent e;
 			e.gamePaused = a_this->freezeTime;
-			hdt::g_frameEventDispatcher.SendEvent(&e);
+			Events::Sources::FrameEventSource::GetSingleton()->SendEvent(&e);
 		}
 
 	}
@@ -255,13 +256,13 @@ namespace Hooks
 		_Unk_sub(a_this);
 
 		//
-		hdt::FrameSyncEvent framesyncEvent;
-		hdt::g_frameSyncEventDispatcher.SendEvent(&framesyncEvent);
+		Events::FrameSyncEvent framesyncEvent;
+		Events::Sources::FrameSyncEventSource::GetSingleton()->SendEvent(&framesyncEvent);
 	}
 
-	bool ActorEquipManagerHooks::UnequipObject
+	bool ActorEquipManagerHooks::func
 	(
-		RE::ActorEquipManager* a_this, 
+		RE::ActorEquipManager* const a_this, 
 		RE::Actor* a_actor, 
 		RE::TESBoundObject* a_object, 
 		RE::ExtraDataList* a_extraData, 
@@ -274,48 +275,104 @@ namespace Hooks
 		const RE::BGSEquipSlot* a_slotToReplace
 	)
 	{
-		hdt::ArmorDetachEvent event;
+		Events::ArmorDetachEvent event;
 		event.actor = a_actor;
 		event.hasDetached = false;
 
 		//
-		hdt::g_armorDetachEventDispatcher.SendEvent(&event);
+		
+		Events::Sources::ArmorDetachEventSource::GetSingleton()->SendEvent(&event);
 
 		//
-		auto ret = _UnequipObject(a_this, a_actor, a_object, a_extraData, a_count, a_slot, a_queueEquip, a_forceEquip, a_playSounds, a_applyNow, a_slotToReplace);
+		auto ret = _func(a_this, a_actor, a_object, a_extraData, a_count, a_slot, a_queueEquip, a_forceEquip, a_playSounds, a_applyNow, a_slotToReplace);
 
 		//
 		event.hasDetached = true;
 
 		//
-		hdt::g_armorDetachEventDispatcher.SendEvent(&event);
+		Events::Sources::ArmorDetachEventSource::GetSingleton()->SendEvent(&event);
 
 		//
 		return ret;
 	}
 
-	RE::NiNode* BipedAnimHooks::unk001CB0E0(RE::BipedAnim* a_this, RE::NiNode* armor, RE::BSFadeNode* skeleton, void* a_unk3, uint32_t a_unk4, uint32_t a_unk5, void* a_unk6)
+	RE::NiAVObject* BipedAnimHooks::func(RE::BipedAnim* const a_this, RE::NiNode* armor, RE::BSFadeNode* skeleton, uint32_t a_unk1, void* a_unk2, void* a_unk3, void* a_unk4)
 	{
-		hdt::ArmorAttachEvent event;
-		event.armorModel = armor;
-		event.skeleton = skeleton;
-		event.attachedNode = nullptr;
-		event.hasAttached = false;
+		Events::ArmorAttachEvent armorAtachEvent;
 
 		//
-		hdt::g_armorAttachEventDispatcher.SendEvent(&event);
+		armorAtachEvent.armorModel = armor;
+		armorAtachEvent.skeleton = skeleton;
+		armorAtachEvent.attachedNode = nullptr;
+		armorAtachEvent.hasAttached = false;
 
 		//
-		RE::NiNode* ret = _unk001CB0E0(a_this, armor, skeleton, a_unk3, a_unk4, a_unk5, a_unk6);
+		Events::Sources::ArmorAttachEventSource::GetSingleton()->SendEvent(&armorAtachEvent);
+		
+		// tmp fix until we figure out why _func is failing on some stuff.
+		std::unordered_map<std::string, std::vector<RE::NiPointer<RE::NiAVObject>>> backupBones;
+
+		//
+		if (armor)
+		{
+			for (auto& NodeName : BackupNodes) 
+			{
+				std::vector<RE::NiPointer<RE::NiAVObject>> result;
+
+				//
+				RE::NiAVObject* object = armor->GetObjectByName(NodeName);
+				RE::BSTriShape* triShape = object ? object->AsTriShape() : nullptr;
+				if (triShape) 
+				{
+					auto size = triShape->skinInstance->skinData->bones;
+					for (int idx = 0; idx < size; idx++)  // all good here
+					{
+						auto bone = triShape->skinInstance->bones[idx];
+						result.emplace_back(hdt::make_nismart(bone));
+					}
+				}
+
+				if (result.size() > 0) 
+				{
+					backupBones.insert({ NodeName, result });
+				}
+			}
+		}
+
+		//
+		RE::NiAVObject* ret = _func(a_this, armor, skeleton, a_unk1, a_unk2, a_unk3, a_unk4);
+
+		//
+		if (ret)
+		{
+			for (auto& NodeName : BackupNodes) 
+			{
+				RE::NiAVObject* object = ret->GetObjectByName(NodeName);
+				RE::BSTriShape* triShape = object ? object->AsTriShape() : nullptr;
+				if (triShape) 
+				{
+					auto size = triShape->skinInstance->skinData->bones;
+					for (int idx = 0; idx < size; idx++) 
+					{
+						auto bone = triShape->skinInstance->bones[idx];
+						if (bone == nullptr)
+						{
+							if (backupBones.contains(NodeName))
+								bone = triShape->skinInstance->bones[idx] = backupBones[NodeName][idx].get();
+						}
+					}
+				}
+			}
+		}
 
 		//
 		if (ret) 
 		{
-			event.attachedNode = ret;
-			event.hasAttached = true;
+			armorAtachEvent.attachedNode = ret;
+			armorAtachEvent.hasAttached = true;
 
 			//
-			hdt::g_armorAttachEventDispatcher.SendEvent(&event);
+			Events::Sources::ArmorAttachEventSource::GetSingleton()->SendEvent(&armorAtachEvent);
 		}
 
 		//
@@ -326,12 +383,19 @@ namespace Hooks
 	{
 		logger::trace("Hooking...");
 
-		//
+		// generic hooks
 		BSFaceGenNiNodeHooks::Hook();
 		MainHooks::Hook();
-		DetourRestoreAfterWith();
+		
+		//
 		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
 		ActorEquipManagerHooks::Hook();
+		DetourTransactionCommit();
+
+		//
+		DetourTransactionBegin();
+		DetourUpdateThread(GetCurrentThread());
 		BipedAnimHooks::Hook();
 		DetourTransactionCommit();
 

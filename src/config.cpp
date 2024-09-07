@@ -1,7 +1,8 @@
 #include "config.h"
 #include "XmlReader.h"
-#
 #include "hdtSkyrimPhysicsWorld.h"
+#include "Hooks.h"
+
 #ifdef CUDA
 #include "hdtSkinnedMesh/hdtCudaInterface.h"
 #endif
@@ -100,6 +101,24 @@ namespace hdt
 				{
 					g_logLevel = reader.readInt();
 				} 
+				else if (reader.GetLocalName() == "backupNodeByName") 
+				{
+					// Parse the string return value from reader.readText(); so we can have single strings instead of the group, example text -> "Virtual Hands, Virtual Body, Virtual Belly"... said text in a array like so -> { "Virtual Hands", "Virtual Body", "Virtual Belly"
+
+					std::stringstream ss(reader.readText());
+					std::string item;
+
+					while (std::getline(ss, item, ',')) 
+					{
+						// Remove leading space
+						if (!item.empty() && item[0] == ' ') 
+						{
+							item.erase(0, 1);
+						}
+
+						Hooks::BipedAnimHooks::BackupNodes.push_back(item);
+					}
+				}
 				else if (reader.GetLocalName() == "enableNPCFaceParts") 
 				{
 					ActorManager::instance()->m_skinNPCFaceParts = reader.readBool();
@@ -224,7 +243,10 @@ namespace hdt
 	void loadConfig()
 	{
 		auto bytes = readAllFile2("data/skse/plugins/hdtSkinnedMeshConfigs/configs.xml");
-		if (bytes.empty()) return;
+		if (bytes.empty())
+		{
+			return;
+		}
 
 		// Store original locale
 		char saved_locale[32];

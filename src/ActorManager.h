@@ -2,19 +2,20 @@
 
 #include "NetImmerseUtils.h"
 #include "FrameworkUtils.h"
+
 #include "hdtSkyrimSystem.h"
-#include "HookEvents.h"
 #include "DynamicHDT.h"
+#include "Events.h"
 
 namespace hdt
 {
 	class ActorManager : 
-		public RE::BSTEventSink<ArmorAttachEvent>, 
-		public RE::BSTEventSink<ArmorDetachEvent>, 
-		public RE::BSTEventSink<SkinSingleHeadGeometryEvent>, 
-		public RE::BSTEventSink<SkinAllHeadGeometryEvent>, 
-		public RE::BSTEventSink<FrameEvent>, 
-		public RE::BSTEventSink<ShutdownEvent>
+		public RE::BSTEventSink<Events::ArmorAttachEvent>, 
+		public RE::BSTEventSink<Events::ArmorDetachEvent>, 
+		public RE::BSTEventSink<Events::SkinSingleHeadGeometryEvent>, 
+		public RE::BSTEventSink<Events::SkinAllHeadGeometryEvent>, 
+		public RE::BSTEventSink<Events::FrameEvent>, 
+		public RE::BSTEventSink<Events::ShutdownEvent>
 	{
 		using IDType = uint32_t;
 	public:
@@ -211,16 +212,16 @@ namespace hdt
 		*/
 		void fixArmorNameMaps();
 
-		RE::BSEventNotifyControl ProcessEvent(const ArmorAttachEvent* e, RE::BSTEventSource<ArmorAttachEvent>*) override;
-		RE::BSEventNotifyControl ProcessEvent(const ArmorDetachEvent* e, RE::BSTEventSource<ArmorDetachEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::ArmorAttachEvent* e, RE::BSTEventSource<Events::ArmorAttachEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::ArmorDetachEvent* e, RE::BSTEventSource<Events::ArmorDetachEvent>*) override;
 
 		// @brief On this event, we decide which skeletons will be active for physics this frame.
-		RE::BSEventNotifyControl ProcessEvent(const FrameEvent* e, RE::BSTEventSource<FrameEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::FrameEvent* e, RE::BSTEventSource<Events::FrameEvent>*) override;
 
 		RE::BSEventNotifyControl ProcessEvent(const RE::MenuOpenCloseEvent*, RE::BSTEventSource<RE::MenuOpenCloseEvent>*);
-		RE::BSEventNotifyControl ProcessEvent(const ShutdownEvent*, RE::BSTEventSource<ShutdownEvent>*) override;
-		RE::BSEventNotifyControl ProcessEvent(const SkinSingleHeadGeometryEvent*, RE::BSTEventSource<SkinSingleHeadGeometryEvent>*) override;
-		RE::BSEventNotifyControl ProcessEvent(const SkinAllHeadGeometryEvent*, RE::BSTEventSource<SkinAllHeadGeometryEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::ShutdownEvent*, RE::BSTEventSource<Events::ShutdownEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::SkinSingleHeadGeometryEvent*, RE::BSTEventSource<Events::SkinSingleHeadGeometryEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::SkinAllHeadGeometryEvent*, RE::BSTEventSource<Events::SkinAllHeadGeometryEvent>*) override;
 
 		bool skeletonNeedsParts(RE::NiNode* skeleton);
 		std::vector<Skeleton>& getSkeletons();//Altered by Dynamic HDT

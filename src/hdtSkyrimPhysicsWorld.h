@@ -3,7 +3,7 @@
 #include "ActorManager.h"
 #include "hdtSkyrimSystem.h"
 #include "hdtSkinnedMesh/hdtSkinnedMeshWorld.h"
-#include "HookEvents.h"
+#include "Events.h"
 
 namespace hdt
 {
@@ -11,10 +11,10 @@ namespace hdt
 
 	class SkyrimPhysicsWorld : 
 		protected SkinnedMeshWorld, 
-		public RE::BSTEventSink<FrameEvent>,
-		public RE::BSTEventSink<ShutdownEvent>, 
+		public RE::BSTEventSink<Events::FrameEvent>,
+		public RE::BSTEventSink<Events::ShutdownEvent>, 
 		public RE::BSTEventSink<SKSE::CameraEvent>, 
-		public RE::BSTEventSink<FrameSyncEvent>
+		public RE::BSTEventSink<Events::FrameSyncEvent>
 	{
 	public:
 
@@ -31,9 +31,9 @@ namespace hdt
 		void resetTransformsToOriginal();
 		void resetSystems();
 
-		RE::BSEventNotifyControl ProcessEvent(const FrameEvent* e, RE::BSTEventSource<FrameEvent>*) override;
-		RE::BSEventNotifyControl ProcessEvent(const FrameSyncEvent* e, RE::BSTEventSource<FrameSyncEvent>*) override;
-		RE::BSEventNotifyControl ProcessEvent(const ShutdownEvent* e, RE::BSTEventSource<ShutdownEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::FrameEvent* e, RE::BSTEventSource<Events::FrameEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::FrameSyncEvent* e, RE::BSTEventSource<Events::FrameSyncEvent>*) override;
+		RE::BSEventNotifyControl ProcessEvent(const Events::ShutdownEvent* e, RE::BSTEventSource<Events::ShutdownEvent>*) override;
 		RE::BSEventNotifyControl ProcessEvent(const SKSE::CameraEvent* evn, RE::BSTEventSource<SKSE::CameraEvent>* dispatcher) override;
 
 		bool isSuspended() { return m_suspended; }

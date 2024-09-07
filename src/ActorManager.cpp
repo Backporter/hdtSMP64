@@ -110,7 +110,7 @@ namespace hdt
 		return &s;
 	}
 
-	RE::BSEventNotifyControl ActorManager::ProcessEvent(const ArmorAttachEvent* e, RE::BSTEventSource<ArmorAttachEvent>*)
+	RE::BSEventNotifyControl ActorManager::ProcessEvent(const Events::ArmorAttachEvent* e, RE::BSTEventSource<Events::ArmorAttachEvent>*)
 	{
 		// No armor is ever attached to a lurker skeleton, thus we don't need to test.
 		if (e->skeleton == nullptr || !findNode(e->skeleton, "NPC")) 
@@ -154,7 +154,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl ActorManager::ProcessEvent(const ArmorDetachEvent* e, RE::BSTEventSource<ArmorDetachEvent>*)
+	RE::BSEventNotifyControl ActorManager::ProcessEvent(const Events::ArmorDetachEvent* e, RE::BSTEventSource<Events::ArmorDetachEvent>*)
 	{
 		if (!e->actor || !e->hasDetached || !instance()->m_disableSMPHairWhenWigEquipped) 
 		{
@@ -198,7 +198,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl ActorManager::ProcessEvent(const FrameEvent*, RE::BSTEventSource<FrameEvent>*)
+	RE::BSEventNotifyControl ActorManager::ProcessEvent(const Events::FrameEvent*, RE::BSTEventSource<Events::FrameEvent>*)
 	{
 		std::lock_guard<decltype(m_lock)> l(m_lock);
 
@@ -209,7 +209,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl ActorManager::ProcessEvent(const ShutdownEvent*, RE::BSTEventSource<ShutdownEvent>*)
+	RE::BSEventNotifyControl ActorManager::ProcessEvent(const Events::ShutdownEvent*, RE::BSTEventSource<Events::ShutdownEvent>*)
 	{
 		m_shutdown = true;
 		std::lock_guard<decltype(m_lock)> l(m_lock);
@@ -219,7 +219,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl ActorManager::ProcessEvent(const SkinSingleHeadGeometryEvent* e, RE::BSTEventSource<SkinSingleHeadGeometryEvent>*)
+	RE::BSEventNotifyControl ActorManager::ProcessEvent(const Events::SkinSingleHeadGeometryEvent* e, RE::BSTEventSource<Events::SkinSingleHeadGeometryEvent>*)
 	{
 		// This case never happens to a lurker skeleton, thus we don't need to test.
 		auto npc = findNode(e->skeleton, "NPC");
@@ -273,7 +273,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl ActorManager::ProcessEvent(const SkinAllHeadGeometryEvent* e, RE::BSTEventSource<SkinAllHeadGeometryEvent>*)
+	RE::BSEventNotifyControl ActorManager::ProcessEvent(const Events::SkinAllHeadGeometryEvent* e, RE::BSTEventSource<Events::SkinAllHeadGeometryEvent>*)
 	{
 		// This case never happens to a lurker skeleton, thus we don't need to test.
 		auto npc = findNode(e->skeleton, "NPC");
@@ -737,15 +737,18 @@ namespace hdt
 			{
 				logger::debug("Rename Bone {} -> {}.", root->name, newName.c_str());
 			}
+
 			setNiNodeName(root, newName.c_str());
 		}
 
 		auto& children = root->GetChildren();
-		for (uint16_t i = 0; i < children.size(); ++i)
+		for (uint16_t i = 0; i < children.size(); ++i) 
 		{
 			auto child = castNiNode(children[i].get());
-			if (child)
+			if (child) 
+			{
 				renameTree(child, prefix, map);
+			}
 		}
 	}
 
@@ -842,11 +845,22 @@ namespace hdt
 	{
 		for (auto& i : armors)
 		{
-			if (!i.armorWorn) continue;
-			if (i.armorWorn->parent) continue;
+			if (!i.armorWorn)
+			{
+				continue;
+			}
+
+			if (i.armorWorn->parent)
+			{
+				continue;
+			}
 
 			i.clearPhysics();
-			if (npc) doSkeletonClean(npc.get(), i.prefix.get());
+			if (npc) 
+			{
+				doSkeletonClean(npc.get(), i.prefix.get());
+			}
+			
 			i.prefix = nullptr;
 		}
 
@@ -860,12 +874,15 @@ namespace hdt
 			if (!headPart.headPart->parent || cleanAll)
 			{
 				if (cleanAll)
+				{
 					logger::debug("Cleaning headpart {} due to clean all.", headPart.headPart->name);
+				}
 				else
+				{
 					logger::debug("Headpart {} disconnected.", headPart.headPart->name);
+				}
 
 				auto renameIt = this->head.renameMap.begin();
-
 				while (renameIt != this->head.renameMap.end())
 				{
 					bool erase = false;
@@ -898,9 +915,13 @@ namespace hdt
 					}
 
 					if (erase)
+					{
 						renameIt = this->head.renameMap.erase(renameIt);
+					}
 					else
+					{
 						++renameIt;
+					}
 				}
 
 				headPart.headPart = nullptr;
@@ -910,8 +931,7 @@ namespace hdt
 			}
 		}
 
-		head.headParts.erase(std::remove_if(head.headParts.begin(), head.headParts.end(),
-			[](Head::HeadPart& i) { return !i.headPart; }), head.headParts.end());
+		head.headParts.erase(std::remove_if(head.headParts.begin(), head.headParts.end(), [](Head::HeadPart& i) { return !i.headPart; }), head.headParts.end());
 	}
 
 	void ActorManager::Skeleton::clear()

@@ -32,7 +32,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl EventDebugLogger::ProcessEvent(const ArmorAttachEvent* e, RE::BSTEventSource<ArmorAttachEvent>*)
+	RE::BSEventNotifyControl EventDebugLogger::ProcessEvent(const Events::ArmorAttachEvent* e, RE::BSTEventSource<Events::ArmorAttachEvent>*)
 	{
 		logger::debug
 		(

@@ -1,7 +1,6 @@
 #include "Hooks.h"
 #include "Events.h"
 #include "Hooks.h"
-#include "HookEvents.h"
 #include "ActorManager.h"
 #include "hdtSkyrimPhysicsWorld.h"
 #include "PluginInterfaceImpl.h"
@@ -558,6 +557,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		{
 			hdt::g_pluginInterface.onPostPostLoad();
 			checkOldPlugins();
+			Hooks::Install();
 		}
 		break;
 	}
@@ -600,7 +600,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-#ifndef NDEBUG
+// #ifndef NDEBUG
 	auto start = std::chrono::high_resolution_clock::now();
 
 	while (!IsDebuggerPresent()) 
@@ -613,7 +613,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 			break;
 		}
 	}
-#endif
+// #endif
 
 	//
 	hdt::loadConfig();
@@ -630,21 +630,36 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		return false;
 	}
 
-	hdt::g_frameEventDispatcher.AddEventSink(hdt::ActorManager::instance());
-	hdt::g_shutdownEventDispatcher.AddEventSink(hdt::ActorManager::instance());
-	hdt::g_armorAttachEventDispatcher.AddEventSink(hdt::ActorManager::instance());
-	hdt::g_armorDetachEventDispatcher.AddEventSink(hdt::ActorManager::instance());
-	hdt::g_skinSingleHeadGeometryEventDispatcher.AddEventSink(hdt::ActorManager::instance());
-	hdt::g_skinAllHeadGeometryEventDispatcher.AddEventSink(hdt::ActorManager::instance());
-	hdt::g_frameEventDispatcher.AddEventSink(hdt::SkyrimPhysicsWorld::get());
-	hdt::g_shutdownEventDispatcher.AddEventSink(hdt::SkyrimPhysicsWorld::get());
-
-	Hooks::Install();
+	//
+	Events::Sources::FrameEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
+	Events::Sources::FrameEventSource::GetSingleton()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
 	
-	hdt::g_pluginInterface.init(a_skse);
+	//
+	Events::Sources::FrameSyncEventSource::GetSingleton()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
 
+	//
+	Events::Sources::ShutdownEventEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
+	Events::Sources::ShutdownEventEventSource::GetSingleton()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
+
+	//
+	Events::Sources::ArmorAttachEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
+	
+	//
+	Events::Sources::ArmorDetachEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
+	
+	//
+	Events::Sources::SkinSingleHeadGeometryEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
+	
+	//
+	Events::Sources::SkinAllHeadGeometryEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
+	
+	//
 	SKSE::GetCameraEventSource()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
 	
+	//
+	hdt::g_pluginInterface.init(a_skse);
+
+	//
 	auto unusedCommand = RE::SCRIPT_FUNCTION::LocateConsoleCommand("ShowRenderPasses");
 	if (unusedCommand)
 	{

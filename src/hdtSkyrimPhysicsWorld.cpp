@@ -305,7 +305,7 @@ namespace hdt
 			i->readTransform(RESET_PHYSICS);
 	}
 
-	RE::BSEventNotifyControl SkyrimPhysicsWorld::ProcessEvent(const FrameEvent* e, RE::BSTEventSource<FrameEvent>*)
+	RE::BSEventNotifyControl SkyrimPhysicsWorld::ProcessEvent(const Events::FrameEvent* e, RE::BSTEventSource<Events::FrameEvent>*)
 	{
 		auto mm = RE::UI::GetSingleton();
 
@@ -352,7 +352,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl SkyrimPhysicsWorld::ProcessEvent(const FrameSyncEvent*, RE::BSTEventSource<FrameSyncEvent>*)
+	RE::BSEventNotifyControl SkyrimPhysicsWorld::ProcessEvent(const Events::FrameSyncEvent*, RE::BSTEventSource<Events::FrameSyncEvent>*)
 	{
 		if (m_doMetrics)
 		{
@@ -383,7 +383,7 @@ namespace hdt
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
-	RE::BSEventNotifyControl SkyrimPhysicsWorld::ProcessEvent(const ShutdownEvent*, RE::BSTEventSource<ShutdownEvent>*)
+	RE::BSEventNotifyControl SkyrimPhysicsWorld::ProcessEvent(const Events::ShutdownEvent*, RE::BSTEventSource<Events::ShutdownEvent>*)
 	{
 		while (m_systems.size())
 		{
