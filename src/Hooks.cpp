@@ -324,10 +324,10 @@ namespace Hooks
 				RE::BSTriShape* triShape = object ? object->AsTriShape() : nullptr;
 				if (triShape) 
 				{
-					auto size = triShape->skinInstance->skinData->bones;
+					auto size = triShape->GetGeometryRuntimeData().skinInstance->skinData->bones;
 					for (int idx = 0; idx < size; idx++)  // all good here
 					{
-						auto bone = triShape->skinInstance->bones[idx];
+						auto bone = triShape->GetGeometryRuntimeData().skinInstance->bones[idx];
 						result.emplace_back(hdt::make_nismart(bone));
 					}
 				}
@@ -351,14 +351,16 @@ namespace Hooks
 				RE::BSTriShape* triShape = object ? object->AsTriShape() : nullptr;
 				if (triShape) 
 				{
-					auto size = triShape->skinInstance->skinData->bones;
+					auto size = triShape->GetGeometryRuntimeData().skinInstance->skinData->bones;
 					for (int idx = 0; idx < size; idx++) 
 					{
-						auto bone = triShape->skinInstance->bones[idx];
-						if (bone == nullptr)
+						auto bone = triShape->GetGeometryRuntimeData().skinInstance->bones[idx];
+						if (bone == nullptr) 
 						{
-							if (backupBones.contains(NodeName))
+							if (backupBones.contains(NodeName)) 
+							{
 								bone = triShape->skinInstance->bones[idx] = backupBones[NodeName][idx].get();
+							}
 						}
 					}
 				}
