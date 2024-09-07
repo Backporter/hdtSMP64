@@ -359,7 +359,7 @@ namespace Hooks
 						{
 							if (backupBones.contains(NodeName)) 
 							{
-								bone = triShape->skinInstance->bones[idx] = backupBones[NodeName][idx].get();
+								bone = triShape->GetGeometryRuntimeData().skinInstance->bones[idx] = backupBones[NodeName][idx].get();
 							}
 						}
 					}
