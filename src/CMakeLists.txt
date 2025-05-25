@@ -513,6 +513,13 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/PluginAPI.h"
 	"${SOURCE_DIR}/PluginInterfaceImpl.cpp"
 	"${SOURCE_DIR}/PluginInterfaceImpl.h"
+
+	"${SOURCE_DIR}/PluginInterface_v1/PluginAPI.h"
+	"${SOURCE_DIR}/PluginInterface_v1/PluginInterfaceImpl.cpp"
+	"${SOURCE_DIR}/PluginInterface_v1/PluginInterfaceImpl.h"
+	"${SOURCE_DIR}/PluginInterface_v1/IEventDispatcher.h"
+	"${SOURCE_DIR}/PluginInterface_v1/IEventListener.h"
+
 	"${SOURCE_DIR}/DynamicHDT.cpp"
 	"${SOURCE_DIR}/DynamicHDT.h"
 	"${SOURCE_DIR}/WeatherManager.cpp"

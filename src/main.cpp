@@ -555,7 +555,8 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		break;
 		case SKSE::MessagingInterface::kPostPostLoad:
 		{
-			hdt::g_pluginInterface.onPostPostLoad();
+			hdt::g_pluginInterface_v1.onPostPostLoad();
+			//hdt::g_pluginInterface.onPostPostLoad();
 			checkOldPlugins();
 			Hooks::Install();
 		}
@@ -591,9 +592,9 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
 
 	v.PluginVersion(Plugin::VERSION);
 	v.PluginName(Plugin::NAME);
-	v.UsesAddressLibrary(true);
+	v.UsesAddressLibrary();
 	v.CompatibleVersions({ SKSE::RUNTIME_SSE_LATEST });
-	v.HasNoStructUse(true);
+	v.UsesUpdatedStructs();
 
 	return v;
 }();
@@ -622,7 +623,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	InitializeLog();
 	logger::info("{} v{}"sv, Plugin::NAME, Plugin::VERSION.string());
 
-	SKSE::Init(a_skse);
+	SKSE::Init(a_skse, false);
 	
 	const auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener("SKSE", MessageHandler)) 
@@ -657,7 +658,8 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	SKSE::GetCameraEventSource()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
 	
 	//
-	hdt::g_pluginInterface.init(a_skse);
+	hdt::g_pluginInterface_v1.init(a_skse);
+	//hdt::g_pluginInterface.init(a_skse);
 
 	//
 	auto unusedCommand = RE::SCRIPT_FUNCTION::LocateConsoleCommand("ShowRenderPasses");
