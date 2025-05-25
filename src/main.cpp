@@ -555,8 +555,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 		break;
 		case SKSE::MessagingInterface::kPostPostLoad:
 		{
-			hdt::g_pluginInterface_v1.onPostPostLoad();
-			//hdt::g_pluginInterface.onPostPostLoad();
+			hdt::g_pluginInterface.onPostPostLoad();
 			checkOldPlugins();
 			Hooks::Install();
 		}
@@ -658,8 +657,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	SKSE::GetCameraEventSource()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
 	
 	//
-	hdt::g_pluginInterface_v1.init(a_skse);
-	//hdt::g_pluginInterface.init(a_skse);
+	hdt::g_pluginInterface.init(a_skse);
 
 	//
 	auto unusedCommand = RE::SCRIPT_FUNCTION::LocateConsoleCommand("ShowRenderPasses");

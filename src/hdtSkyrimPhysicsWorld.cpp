@@ -107,7 +107,6 @@ namespace hdt
 			startTime = ticks.QuadPart;
 		}
 
-		g_pluginInterface_v1.onPreStep({ getCollisionObjectArray(), remainingTimeStep });
 		g_pluginInterface.onPreStep({ getCollisionObjectArray(), remainingTimeStep });
 
 		updateActiveState();
@@ -116,7 +115,6 @@ namespace hdt
 		restoreTranslationOffset(offset);
 		m_accumulatedInterval = 0;
 
-		g_pluginInterface_v1.onPostStep({ getCollisionObjectArray(), remainingTimeStep });
 		g_pluginInterface.onPostStep({ getCollisionObjectArray(), remainingTimeStep });
 
 		writeTransform();

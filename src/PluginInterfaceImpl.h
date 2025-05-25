@@ -1,6 +1,5 @@
 #pragma once
 
-#include "PluginInterface_v1/PluginInterfaceImpl.h"
 #include "PluginAPI.h"
 
 namespace hdt
@@ -38,6 +37,5 @@ namespace hdt
 		SKSE::MessagingInterface* m_skseMessagingInterface;
 	};
 
-	extern hdt::PluginInterface_v1::PluginInterfaceImpl g_pluginInterface_v1;
 	extern PluginInterfaceImpl g_pluginInterface;
 }

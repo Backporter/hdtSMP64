@@ -1,6 +1,9 @@
 #pragma once
 
-/*Plugins should register for messages from hdtSMP64 via SKSE during SKSE's PostLoad event.
+/*
+*				Legacy API
+* 
+* Plugins should register for messages from hdtSMP64 via SKSE during SKSE's PostLoad event.
 * When ready, hdtSMP64 will send a message of type MSG_STARTUP containing a PluginInterface* as data.
 * 
 * A plugin MUST verify compatibility with the interface version before calling any other functions.
@@ -21,6 +24,20 @@ class btCollisionObject;
 
 namespace hdt
 {
+	template <class Event = void>
+	class IEventListener
+	{
+	public:
+		virtual void onEvent(const Event&) = 0;
+	};
+
+	template <>
+	class IEventListener<void>
+	{
+	public:
+		virtual void onEvent() = 0;
+	};
+
 	//Sent right before the physics simulation begins updating.
 	//Only forces and torques may be applied during this event.
 	//The collision objects must in every other regard be treated as read-only.
@@ -38,8 +55,8 @@ namespace hdt
 		float timeStep{ 0.0f };
 	};
 
-	using IPreStepListener = RE::BSTEventSink<PreStepEvent>;
-	using IPostStepListener = RE::BSTEventSink<PostStepEvent>;
+	using IPreStepListener = IEventListener<PreStepEvent>;
+	using IPostStepListener = IEventListener<PostStepEvent>;
 
 	class PluginInterface
 	{
