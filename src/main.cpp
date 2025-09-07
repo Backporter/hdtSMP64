@@ -591,9 +591,9 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []()
 
 	v.PluginVersion(Plugin::VERSION);
 	v.PluginName(Plugin::NAME);
-	v.UsesAddressLibrary(true);
+	v.UsesAddressLibrary();
 	v.CompatibleVersions({ SKSE::RUNTIME_SSE_LATEST });
-	v.HasNoStructUse(true);
+	v.UsesUpdatedStructs();
 
 	return v;
 }();
@@ -622,7 +622,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	InitializeLog();
 	logger::info("{} v{}"sv, Plugin::NAME, Plugin::VERSION.string());
 
-	SKSE::Init(a_skse);
+	SKSE::Init(a_skse, false);
 	
 	const auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener("SKSE", MessageHandler)) 
