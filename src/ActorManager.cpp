@@ -572,7 +572,7 @@ namespace hdt
 
 	void ActorManager::PhysicsItem::clearPhysics()
 	{
-		if (state() == ItemState::e_Active)
+		if (state() == ItemState::kActive)
 		{
 			m_physics->m_world->removeSkinnedMeshSystem(m_physics.get());
 		}
@@ -581,7 +581,7 @@ namespace hdt
 
 	ActorManager::ItemState ActorManager::PhysicsItem::state() const
 	{
-		return m_physics ? (m_physics->m_world ? ItemState::e_Active : ItemState::e_Inactive) : ItemState::e_NoPhysics;
+		return m_physics ? (m_physics->m_world ? ItemState::kActive : ItemState::kInactive) : ItemState::kNoPhysics;
 	}
 
 	const std::vector<RE::BSTSmartPointer<SkinnedMeshBody>>& ActorManager::PhysicsItem::meshes() const
@@ -591,11 +591,11 @@ namespace hdt
 
 	void ActorManager::PhysicsItem::updateActive(bool active)
 	{
-		if (active && state() == ItemState::e_Inactive)
+		if (active && state() == ItemState::kInactive)
 		{
 			SkyrimPhysicsWorld::get()->addSkinnedMeshSystem(m_physics.get());
 		}
-		else if (!active && state() == ItemState::e_Active)
+		else if (!active && state() == ItemState::kActive)
 		{
 			m_physics->m_world->removeSkinnedMeshSystem(m_physics.get());
 		}
@@ -973,7 +973,7 @@ namespace hdt
 		hasPhysics = false;
 		std::for_each(armors.begin(), armors.end(), [=](Armor& armor) 
 		{
-			if (armor.state() != ItemState::e_NoPhysics)
+			if (armor.state() != ItemState::kNoPhysics)
 			{
 				hasPhysics = true;
 			}
@@ -983,7 +983,7 @@ namespace hdt
 		{
 			std::for_each(head.headParts.begin(), head.headParts.end(), [=](Head::HeadPart& headPart) 
 			{
-				if (headPart.state() != ItemState::e_NoPhysics)
+				if (headPart.state() != ItemState::kNoPhysics)
 				{
 					hasPhysics = true;
 				}
@@ -1074,10 +1074,10 @@ namespace hdt
 		// the distance between them is below the threshold value,
 		// and the angle difference between the camera orientation and the skeleton orientation is below the threshold value.
 		isActive = false;
-		state = SkeletonState::e_InactiveNotInScene;
+		state = SkeletonState::kInactiveNotInScene;
 
 		if (deactivate)
-			state = SkeletonState::e_InactiveTooFar;
+			state = SkeletonState::kInactiveTooFar;
 		else if (isActiveInScene() || skeleton->parent && skeleton->parent->parent == playerCell)
 		{
 			if (isPlayerCharacter())
@@ -1088,16 +1088,16 @@ namespace hdt
 					&& RE::PlayerCamera::GetSingleton()->currentState == RE::PlayerCamera::GetSingleton()->GetRuntimeData().cameraStates[0])) // 1st person view
 				{
 					isActive = true;
-					state = SkeletonState::e_ActiveIsPlayer;
+					state = SkeletonState::kActiveIsPlayer;
 				}
 			}
 			else if (isInPlayerView())
 			{
 				isActive = true;
-				state = SkeletonState::e_ActiveNearPlayer;
+				state = SkeletonState::kActiveNearPlayer;
 			}
 			else
-				state = SkeletonState::e_InactiveUnseenByPlayer;
+				state = SkeletonState::kInactiveUnseenByPlayer;
 		}
 
 		// We update the activity state of armors and head parts, and add and remove SkinnedMeshSystems to these parts in consequence.

@@ -10,18 +10,18 @@ namespace hdt
 
 		enum Events
 		{
-			e_Start,
-			e_Internal,
-			e_Launched,
-			e_End
+			kStart,
+			kInternal,
+			kLaunched,
+			kEnd
 		};
 
 		enum Measurements
 		{
-			e_InternalUpdate,
-			e_CollisionLaunch,
-			e_CollisionProcess,
-			e_Total
+			kInternalUpdate,
+			kCollisionLaunch,
+			kCollisionProcess,
+			kTotal
 		};
 
 		void reset(int nFrames);

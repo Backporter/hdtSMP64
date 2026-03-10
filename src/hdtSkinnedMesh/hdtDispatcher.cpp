@@ -143,7 +143,7 @@ namespace hdt
 #ifdef CUDA
 			}
 		bool haveCuda = CudaInterface::instance()->hasCuda() && (!FrameTimer::instance()->running() || FrameTimer::instance()->cudaFrame());
-		FrameTimer::instance()->logEvent(FrameTimer::e_Start);
+		FrameTimer::instance()->logEvent(FrameTimer::kStart);
 		if (haveCuda)
 		{
 			bool initialized = true;
@@ -236,7 +236,7 @@ namespace hdt
 				});
 		}
 
-		FrameTimer::instance()->logEvent(FrameTimer::e_Internal);
+		FrameTimer::instance()->logEvent(FrameTimer::kInternal);
 		m_delayedFuncs.clear();
 
 		if (haveCuda)
@@ -263,7 +263,7 @@ namespace hdt
 				}
 			}
 
-			FrameTimer::instance()->logEvent(FrameTimer::e_Launched);
+			FrameTimer::instance()->logEvent(FrameTimer::kLaunched);
 
 			for (auto f : m_immediateFuncs)
 			{
@@ -289,13 +289,13 @@ namespace hdt
 						SkinnedMeshAlgorithm::processCollision(i.first, i.second, this);
 					}
 				});
-			FrameTimer::instance()->logEvent(FrameTimer::e_Launched);
+			FrameTimer::instance()->logEvent(FrameTimer::kLaunched);
 		}
 
 		m_pairs.clear();
 
 		FrameTimer::instance()->addManifoldCount(getNumManifolds());
-		FrameTimer::instance()->logEvent(FrameTimer::e_End);
+		FrameTimer::instance()->logEvent(FrameTimer::kEnd);
 	}
 #else
 			});

@@ -10,7 +10,6 @@ namespace Hooks
 {
 	void BSFaceGenNiNodeHooks::ProcessHeadPart(RE::BSFaceGenNiNode* const a_this, RE::BGSHeadPart* headPart, RE::NiNode* a_skeleton, bool a_unk)
 	{
-		//
 		if (headPart) 
 		{
 			RE::NiAVObject* headNode = a_this->GetObjectByName(headPart->formEditorID);
@@ -23,7 +22,6 @@ namespace Hooks
 				}
 			}
 
-			//
 			for (auto it : headPart->extraParts)
 			{
 				ProcessHeadPart(a_this, it, a_skeleton, a_unk);
@@ -38,10 +36,11 @@ namespace Hooks
 		{
 			RE::TESForm* form = RE::TESForm::LookupByID(a_skeleton->GetUserData()->formID);
 			RE::Actor* actor = skyrim_cast<RE::Actor*>(form);
+
 			if (actor) 
 			{
-				RE::TESNPC* actorBase = skyrim_cast<RE::TESNPC*>(actor->data.objectReference);
-				uint32_t numHeadParts = 0;
+				RE::TESNPC*       actorBase = skyrim_cast<RE::TESNPC*>(actor->data.objectReference);
+				uint32_t          numHeadParts = 0;
 				RE::BGSHeadPart** Headparts = nullptr;
 
 				if (actorBase->HasOverlays()) 
@@ -81,11 +80,9 @@ namespace Hooks
 
 	void BSFaceGenNiNodeHooks::SkinSingleGeometry__Hook(RE::BSFaceGenNiNode* const a_this, RE::NiNode* a_skeleton, RE::BSGeometry* a_triShape, bool a_unk)
 	{
-		//
 		const char* name = "";
 		uint32_t formId = 0x0;
 
-		//
 		if (a_skeleton->GetUserData() && a_skeleton->GetUserData()->GetBaseObject()) 
 		{
 			auto bname = skyrim_cast<RE::TESFullName*>(a_skeleton->GetUserData()->GetBaseObject());
@@ -109,18 +106,14 @@ namespace Hooks
 		e.headNode = a_this;
 		e.skeleton = a_skeleton;
 		e.geometry = a_triShape;
-
-		//
 		Events::Sources::SkinSingleHeadGeometryEventSource::GetSingleton()->SendEvent(&e);
 	}
 
 	void BSFaceGenNiNodeHooks::SkinAllGeometry__Hook(RE::BSFaceGenNiNode* const a_this, RE::NiNode* a_skeleton, bool a_unk)
 	{
-		//
 		const char* name = "";
 		uint32_t formId = 0x0;
 
-		//
 		if (a_skeleton->GetUserData() && a_skeleton->GetUserData()->data.objectReference) 
 		{
 			auto bname = skyrim_cast<RE::TESFullName*>(a_skeleton->GetUserData()->data.objectReference);
@@ -143,10 +136,8 @@ namespace Hooks
 		Events::SkinAllHeadGeometryEvent e;
 		e.skeleton = a_skeleton;
 		e.headNode = a_this;
-
 		Events::Sources::SkinAllHeadGeometryEventSource::GetSingleton()->SendEvent(&e);
 
-		//
 		if (REL::Module::IsAE())
 		{
 			SkinAllGeometryCalls(a_this, a_skeleton, a_unk);
@@ -156,10 +147,7 @@ namespace Hooks
 			SkinAllGeometry(a_this, a_skeleton, a_unk);
 		}
 		
-		//
 		e.hasSkinned = true;
-
-		//
 		Events::Sources::SkinAllHeadGeometryEventSource::GetSingleton()->SendEvent(&e);
 	}
 
@@ -188,22 +176,22 @@ namespace Hooks
 
 	void BSFaceGenNiNodeHooks::ApplyBoneLimitFix()
 	{
-		struct BoneLimitFix : Xbyak::CodeGenerator
+		REL::Relocation<uintptr_t> GeometrySkinningBoneFix{ REL::VariantID(24330, 24836, 0x37ADD0), REL::VariantOffset(0x58, 0x75, 0x58) };
+
+		struct BoneLimitFix :
+			public Xbyak::CodeGenerator
 		{
-			BoneLimitFix(uintptr_t a_returnAddr) : CodeGenerator()
+			BoneLimitFix(uintptr_t a_returnAddr) :
+				Xbyak::CodeGenerator()
 			{
 				Xbyak::Label ret;
 
-				//
-				if (REL::Module::IsSE())
-				{
+				if (REL::Module::IsSE()) {
 					mov(esi, ptr[rax + 0x58]);
 					cmp(esi, 9);
 					jl(ret);
 					mov(esi, 8);
-				}
-				else
-				{
+				} else {
 					mov(ebp, ptr[rax + 0x58]);
 					cmp(ebp, 9);
 					jl(ret);
@@ -218,12 +206,11 @@ namespace Hooks
 		};
 
 		//
-		BoneLimitFix code(GeometrySkinningBoneFix.address() + 5);
+		BoneLimitFix code(GeometrySkinningBoneFix.address() + 7);
 
 		//
 		auto& localTrampoline = SKSE::GetTrampoline();
-		SKSE::AllocTrampoline(14 + code.getSize());
-		
+
 		//
 		localTrampoline.write_branch<5>(GeometrySkinningBoneFix.address(), localTrampoline.allocate(code));
 	}
@@ -280,19 +267,11 @@ namespace Hooks
 		event.hasDetached = false;
 
 		//
-		
 		Events::Sources::ArmorDetachEventSource::GetSingleton()->SendEvent(&event);
-
-		//
 		auto ret = _func(a_this, a_actor, a_object, a_extraData, a_count, a_slot, a_queueEquip, a_forceEquip, a_playSounds, a_applyNow, a_slotToReplace);
-
-		//
 		event.hasDetached = true;
-
-		//
 		Events::Sources::ArmorDetachEventSource::GetSingleton()->SendEvent(&event);
 
-		//
 		return ret;
 	}
 

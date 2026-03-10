@@ -62,18 +62,16 @@ namespace hdt
 			Version bulletVersion;
 		};
 
-	public:
 		constexpr static Version INTERFACE_VERSION{ 2, 0, 0 };
 		constexpr static Version BULLET_VERSION{ 3, 24, 0 };
 
-	public:
+		PluginInterface() = default;
 		virtual ~PluginInterface() = default;
 
 		virtual const VersionInfo& getVersionInfo() const = 0;
 
 		virtual void addListener(IPreStepListener*) = 0;
 		virtual void removeListener(IPreStepListener*) = 0;
-
 		virtual void addListener(IPostStepListener*) = 0;
 		virtual void removeListener(IPostStepListener*) = 0;
 	};

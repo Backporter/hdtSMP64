@@ -33,36 +33,36 @@ namespace hdt
 		QueryPerformanceCounter(&ticks);
 		m_timings[e] = ticks.QuadPart;
 
-		if (e == e_End)
+		if (e == kEnd)
 		{
 			QueryPerformanceFrequency(&ticks);
 			float ticks_per_us = static_cast<float>(ticks.QuadPart) / 1e6f;
-			float internalTime = (m_timings[e_Internal] - m_timings[e_Start]) / ticks_per_us;
-			float collisionLaunchTime = (m_timings[e_Launched] - m_timings[e_Internal]) / ticks_per_us;
-			float collisionProcessTime = (m_timings[e_End] - m_timings[e_Launched]) / ticks_per_us;
-			float totalTime = (m_timings[e_End] - m_timings[e_Start]) / ticks_per_us;
+			float internalTime = (m_timings[kInternal] - m_timings[kStart]) / ticks_per_us;
+			float collisionLaunchTime = (m_timings[kLaunched] - m_timings[kInternal]) / ticks_per_us;
+			float collisionProcessTime = (m_timings[kEnd] - m_timings[kLaunched]) / ticks_per_us;
+			float totalTime = (m_timings[kEnd] - m_timings[kStart]) / ticks_per_us;
 
 			if (cudaFrame())
 			{
-				m_sumsGPU[e_InternalUpdate] += internalTime;
-				m_sumsSquaredGPU[e_InternalUpdate] += internalTime * internalTime;
-				m_sumsGPU[e_CollisionLaunch] += collisionLaunchTime;
-				m_sumsSquaredGPU[e_CollisionLaunch] += collisionLaunchTime * collisionLaunchTime;
-				m_sumsGPU[e_CollisionProcess] += collisionProcessTime;
-				m_sumsSquaredGPU[e_CollisionProcess] += collisionProcessTime * collisionProcessTime;
-				m_sumsGPU[e_Total] += totalTime;
-				m_sumsSquaredGPU[e_Total] += totalTime * totalTime;
+				m_sumsGPU[kInternalUpdate] += internalTime;
+				m_sumsSquaredGPU[kInternalUpdate] += internalTime * internalTime;
+				m_sumsGPU[kCollisionLaunch] += collisionLaunchTime;
+				m_sumsSquaredGPU[kCollisionLaunch] += collisionLaunchTime * collisionLaunchTime;
+				m_sumsGPU[kCollisionProcess] += collisionProcessTime;
+				m_sumsSquaredGPU[kCollisionProcess] += collisionProcessTime * collisionProcessTime;
+				m_sumsGPU[kTotal] += totalTime;
+				m_sumsSquaredGPU[kTotal] += totalTime * totalTime;
 			}
 			else
 			{
-				m_sumsCPU[e_InternalUpdate] += internalTime;
-				m_sumsSquaredCPU[e_InternalUpdate] += internalTime * internalTime;
-				m_sumsCPU[e_CollisionLaunch] += collisionLaunchTime;
-				m_sumsSquaredCPU[e_CollisionLaunch] += collisionLaunchTime * collisionLaunchTime;
-				m_sumsCPU[e_CollisionProcess] += collisionProcessTime;
-				m_sumsSquaredCPU[e_CollisionProcess] += collisionProcessTime * collisionProcessTime;
-				m_sumsCPU[e_Total] += totalTime;
-				m_sumsSquaredCPU[e_Total] += totalTime * totalTime;
+				m_sumsCPU[kInternalUpdate] += internalTime;
+				m_sumsSquaredCPU[kInternalUpdate] += internalTime * internalTime;
+				m_sumsCPU[kCollisionLaunch] += collisionLaunchTime;
+				m_sumsSquaredCPU[kCollisionLaunch] += collisionLaunchTime * collisionLaunchTime;
+				m_sumsCPU[kCollisionProcess] += collisionProcessTime;
+				m_sumsSquaredCPU[kCollisionProcess] += collisionProcessTime * collisionProcessTime;
+				m_sumsCPU[kTotal] += totalTime;
+				m_sumsSquaredCPU[kTotal] += totalTime * totalTime;
 			}
 
 			if (--m_nFrames == 0)
@@ -71,44 +71,44 @@ namespace hdt
 				
 				log->Print("Timings over %d frames:", m_count);
 				log->Print("  CPU:");
-				float mean = m_sumsCPU[e_InternalUpdate] / m_count;
+				float mean = m_sumsCPU[kInternalUpdate] / m_count;
 				log->Print("    Internal update mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredCPU[e_InternalUpdate] / m_count - mean * mean));
-				mean = m_sumsCPU[e_CollisionLaunch] / m_count;
+					sqrt(m_sumsSquaredCPU[kInternalUpdate] / m_count - mean * mean));
+				mean = m_sumsCPU[kCollisionLaunch] / m_count;
 				log->Print("    Collision launch mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredCPU[e_CollisionLaunch] / m_count - mean * mean));
-				mean = m_sumsCPU[e_CollisionProcess] / m_count;
+					sqrt(m_sumsSquaredCPU[kCollisionLaunch] / m_count - mean * mean));
+				mean = m_sumsCPU[kCollisionProcess] / m_count;
 				log->Print("    Collision process mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredCPU[e_CollisionProcess] / m_count - mean * mean));
-				mean = m_sumsCPU[e_Total] / m_count;
+					sqrt(m_sumsSquaredCPU[kCollisionProcess] / m_count - mean * mean));
+				mean = m_sumsCPU[kTotal] / m_count;
 				log->Print("    Total mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredCPU[e_Total] / m_count - mean * mean));
+					sqrt(m_sumsSquaredCPU[kTotal] / m_count - mean * mean));
 				mean = static_cast<float>(m_nManifoldsCPU / m_count);
 				log->Print("    Collision manifolds %f, std %f",
 					mean,
 					sqrt(m_nManifolds2CPU / m_count - mean * mean));
 
 				log->Print("  GPU:");
-				mean = m_sumsGPU[e_InternalUpdate] / m_count;
+				mean = m_sumsGPU[kInternalUpdate] / m_count;
 				log->Print("    Internal update mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredGPU[e_InternalUpdate] / m_count - mean * mean));
-				mean = m_sumsGPU[e_CollisionLaunch] / m_count;
+					sqrt(m_sumsSquaredGPU[kInternalUpdate] / m_count - mean * mean));
+				mean = m_sumsGPU[kCollisionLaunch] / m_count;
 				log->Print("    Collision launch mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredGPU[e_CollisionLaunch] / m_count - mean * mean));
-				mean = m_sumsGPU[e_CollisionProcess] / m_count;
+					sqrt(m_sumsSquaredGPU[kCollisionLaunch] / m_count - mean * mean));
+				mean = m_sumsGPU[kCollisionProcess] / m_count;
 				log->Print("    Collision process mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredGPU[e_CollisionProcess] / m_count - mean * mean));
-				mean = m_sumsGPU[e_Total] / m_count;
+					sqrt(m_sumsSquaredGPU[kCollisionProcess] / m_count - mean * mean));
+				mean = m_sumsGPU[kTotal] / m_count;
 				log->Print("    Total mean %f us, std %f us",
 					mean,
-					sqrt(m_sumsSquaredGPU[e_Total] / m_count - mean * mean));
+					sqrt(m_sumsSquaredGPU[kTotal] / m_count - mean * mean));
 				mean = static_cast<float>(m_nManifoldsGPU / m_count);
 				log->Print("    Collision manifolds %f, std %f",
 					mean,

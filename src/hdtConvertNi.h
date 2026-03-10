@@ -21,9 +21,9 @@ namespace hdt
 		return ret;
 	}
 
-	RE::NiPoint3 convertBt(const btVector3& rhs);
-	RE::NiMatrix3 convertBt(const btMatrix3x3& rhs);
-	RE::NiMatrix3 convertBt(const btQuaternion& rhs);
+	RE::NiPoint3    convertBt(const btVector3& rhs);
+	RE::NiMatrix3   convertBt(const btMatrix3x3& rhs);
+	RE::NiMatrix3   convertBt(const btQuaternion& rhs);
 	RE::NiTransform convertBt(const btQsTransform& rhs);
 
 	static const float scaleRealWorld = 0.01425f;

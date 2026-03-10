@@ -9,8 +9,6 @@
 
 namespace hdt
 {
-	int g_logLevel;
-
 	static void solver(XMLReader& reader)
 	{
 		while (reader.Inspect())
@@ -18,6 +16,7 @@ namespace hdt
 			switch (reader.GetInspected())
 			{
 			case XMLReader::Inspected::StartTag:
+			{
 				if (reader.GetLocalName() == "numIterations") 
 				{
 					SkyrimPhysicsWorld::get()->getSolverInfo().m_numIterations = btClamped(reader.readInt(), 4, 128);
@@ -45,10 +44,11 @@ namespace hdt
 				} 
 				else
 				{
-					logger::warn("Unknown config : {}", reader.GetLocalName());
+					logger::warn("solver: Unknown config : {}", reader.GetLocalName());
 					reader.skipCurrentElement();
 				}
 				break;
+			}
 			case XMLReader::Inspected::EndTag:
 				return;
 			}
@@ -62,6 +62,7 @@ namespace hdt
 			switch (reader.GetInspected())
 			{
 			case XMLReader::Inspected::StartTag:
+			{
 				if (reader.GetLocalName() == "windStrength") 
 				{
 					SkyrimPhysicsWorld::get()->m_windStrength = btClamped(reader.readFloat(), 0.f, 1000.f);
@@ -80,10 +81,11 @@ namespace hdt
 				} 
 				else
 				{
-					logger::warn("Unknown config : ", reader.GetLocalName());
+					logger::warn("wind: Unknown config : ", reader.GetLocalName());
 					reader.skipCurrentElement();
 				}
 				break;
+			}
 			case XMLReader::Inspected::EndTag:
 				return;
 			}
@@ -97,14 +99,15 @@ namespace hdt
 			switch (reader.GetInspected())
 			{
 			case XMLReader::Inspected::StartTag:
+			{
 				if (reader.GetLocalName() == "logLevel")
 				{
-					g_logLevel = reader.readInt();
+					auto v = reader.readInt();
+					(void)(v);
 				} 
 				else if (reader.GetLocalName() == "backupNodeByName") 
 				{
 					// Parse the string return value from reader.readText(); so we can have single strings instead of the group, example text -> "Virtual Hands, Virtual Body, Virtual Belly"... said text in a array like so -> { "Virtual Hands", "Virtual Body", "Virtual Belly"
-
 					std::stringstream ss(reader.readText());
 					std::string item;
 
@@ -199,10 +202,11 @@ namespace hdt
 				}
 				else
 				{
-					logger::warn("Unknown config : {}", reader.GetLocalName());
+					logger::warn("smp: Unknown config : {}", reader.GetLocalName());
 					reader.skipCurrentElement();
 				}
 				break;
+			}
 			case XMLReader::Inspected::EndTag:
 				return;
 			}
@@ -216,6 +220,7 @@ namespace hdt
 			switch (reader.GetInspected())
 			{
 			case XMLReader::Inspected::StartTag:
+			{
 				if (reader.GetLocalName() == "solver")
 				{
 					solver(reader);
@@ -234,6 +239,7 @@ namespace hdt
 					reader.skipCurrentElement();
 				}
 				break;
+			}
 			case XMLReader::Inspected::EndTag:
 				return;
 			}
@@ -259,18 +265,25 @@ namespace hdt
 
 		while (reader.Inspect())
 		{
-			if (reader.GetInspected() == XMLReader::Inspected::StartTag)
+			switch (reader.GetInspected())
 			{
-				if (reader.GetLocalName() == "configs")
+			case XMLReader::Inspected::StartTag:
+			{
+				if (reader.GetLocalName() == "configs") 
 				{
 					config(reader);
-				}
-				else
+				} 
+				else 
 				{
-					logger::warn("Unknown config : {}", reader.GetLocalName());
+					logger::warn("loadConfig: Unknown config : {}", reader.GetLocalName());
 					reader.skipCurrentElement();
 				}
 			}
+			break;
+			case XMLReader::Inspected::EndTag:
+				return;
+			}
+
 		}
 
 		// Restore original locale

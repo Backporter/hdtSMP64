@@ -246,11 +246,11 @@ void SMPDebug_PrintDetailed(bool includeItems)
 {
 	static std::map<hdt::ActorManager::SkeletonState, const char*> stateStrings = 
 	{
-		{ hdt::ActorManager::SkeletonState::e_InactiveNotInScene, "Not in scene" },
-		{ hdt::ActorManager::SkeletonState::e_InactiveUnseenByPlayer, "Unseen by player" },
-		{ hdt::ActorManager::SkeletonState::e_InactiveTooFar, "Deactivated for performance" },
-		{ hdt::ActorManager::SkeletonState::e_ActiveIsPlayer, "Is player character" },
-		{ hdt::ActorManager::SkeletonState::e_ActiveNearPlayer, "Is near player" }
+		{ hdt::ActorManager::SkeletonState::kInactiveNotInScene, "Not in scene" },
+		{ hdt::ActorManager::SkeletonState::kInactiveUnseenByPlayer, "Unseen by player" },
+		{ hdt::ActorManager::SkeletonState::kInactiveTooFar, "Deactivated for performance" },
+		{ hdt::ActorManager::SkeletonState::kActiveIsPlayer, "Is player character" },
+		{ hdt::ActorManager::SkeletonState::kActiveNearPlayer, "Is near player" }
 	};
 
 	auto skeletons = hdt::ActorManager::instance()->getSkeletons();
@@ -277,7 +277,7 @@ void SMPDebug_PrintDetailed(bool includeItems)
 		RE::ConsoleLog::GetSingleton()->Print
 		(
 			"[HDT-SMP] %s skeleton - owner %s (refr formid %08x, base formid %08x) - %s",
-			skeleton.state > hdt::ActorManager::SkeletonState::e_SkeletonActive ? "active" : "inactive",
+			skeleton.state > hdt::ActorManager::SkeletonState::kSkeletonActive ? "active" : "inactive",
 			ownerName ? ownerName->GetFullName() : "unk_name",
 			skelOwner ? skelOwner->formID : 0x00000000,
 			skelOwner && skelOwner->GetBaseObject() ? skelOwner->GetBaseObject()->formID : 0x00000000,
@@ -291,11 +291,11 @@ void SMPDebug_PrintDetailed(bool includeItems)
 				RE::ConsoleLog::GetSingleton()->Print
 				(
 					"[HDT-SMP] -- tracked armor addon %s, %s",
-					armor.armorWorn->name,
-					armor.state() != hdt::ActorManager::ItemState::e_NoPhysics ? armor.state() == hdt::ActorManager::ItemState::e_Active ? "has active physics system" : "has inactive physics system" : "has no physics system"
+					armor.armorWorn->name.c_str(),
+					armor.state() != hdt::ActorManager::ItemState::kNoPhysics ? armor.state() == hdt::ActorManager::ItemState::kActive ? "has active physics system" : "has inactive physics system" : "has no physics system"
 				);
 
-				if (armor.state() != hdt::ActorManager::ItemState::e_NoPhysics) 
+				if (armor.state() != hdt::ActorManager::ItemState::kNoPhysics) 
 				{
 					for (auto mesh : armor.meshes()) 
 					{
@@ -315,11 +315,11 @@ void SMPDebug_PrintDetailed(bool includeItems)
 					RE::ConsoleLog::GetSingleton()->Print
 					(
 						"[HDT-SMP] -- tracked headpart %s, %s",
-						headPart.headPart->name,
-						headPart.state() != hdt::ActorManager::ItemState::e_NoPhysics ? headPart.state() == hdt::ActorManager::ItemState::e_Active ? "has active physics system" : "has inactive physics system" : "has no physics system"
+						headPart.headPart->name.c_str(),
+						headPart.state() != hdt::ActorManager::ItemState::kNoPhysics ? headPart.state() == hdt::ActorManager::ItemState::kActive ? "has active physics system" : "has inactive physics system" : "has no physics system"
 					);
 
-					if (headPart.state() != hdt::ActorManager::ItemState::e_NoPhysics) 
+					if (headPart.state() != hdt::ActorManager::ItemState::kNoPhysics) 
 					{
 						for (auto mesh : headPart.meshes()) 
 						{
@@ -345,8 +345,8 @@ bool SMPDebug_Execute
 )
 {
 	char buffer[MAX_PATH];
-	memset(buffer, 0, MAX_PATH);
 	char buffer2[MAX_PATH];
+	memset(buffer, 0, MAX_PATH);
 	memset(buffer2, 0, MAX_PATH);
 
 	if (!RE::Script::ParseParameters(a_paramInfo, a_scriptData, a_opcodeOffsetPtr, a_thisObj, a_containingObj, a_scriptObj, a_locals, buffer, buffer2)) 
@@ -437,8 +437,6 @@ bool SMPDebug_Execute
 		return true;
 	}
 
-	auto skeletons = hdt::ActorManager::instance()->getSkeletons();
-
 	size_t activeSkeletons = 0;
 	size_t armors = 0;
 	size_t headParts = 0;
@@ -446,33 +444,30 @@ bool SMPDebug_Execute
 	size_t activeHeadParts = 0;
 	size_t activeCollisionMeshes = 0;
 
+	auto skeletons = hdt::ActorManager::instance()->getSkeletons();
 	for (auto skeleton : skeletons) 
 	{
-		if (skeleton.state > hdt::ActorManager::SkeletonState::e_SkeletonActive)
+		if (skeleton.state > hdt::ActorManager::SkeletonState::kSkeletonActive)
 			activeSkeletons++;
 
-		for (const auto armor : skeleton.getArmors()) 
+		for (const auto& armor : skeleton.getArmors()) 
 		{
 			armors++;
-
-			if (armor.state() == hdt::ActorManager::ItemState::e_Active) 
+			if (armor.state() == hdt::ActorManager::ItemState::kActive) 
 			{
 				activeArmors++;
-
 				activeCollisionMeshes += armor.meshes().size();
 			}
 		}
 
 		if (skeleton.head.headNode) 
 		{
-			for (const auto headpart : skeleton.head.headParts) 
+			for (const auto& headpart : skeleton.head.headParts) 
 			{
 				headParts++;
-
-				if (headpart.state() == hdt::ActorManager::ItemState::e_Active) 
+				if (headpart.state() == hdt::ActorManager::ItemState::kActive) 
 				{
 					activeHeadParts++;
-
 					activeCollisionMeshes += headpart.meshes().size();
 				}
 			}
@@ -486,6 +481,7 @@ bool SMPDebug_Execute
 	RE::ConsoleLog::GetSingleton()->Print("[HDT-SMP] active armor addons: %d", activeArmors);
 	RE::ConsoleLog::GetSingleton()->Print("[HDT-SMP] active head parts: %d", activeHeadParts);
 	RE::ConsoleLog::GetSingleton()->Print("[HDT-SMP] active collision meshes: %d", activeCollisionMeshes);
+
 	return true;
 }
 
@@ -504,14 +500,17 @@ namespace
 		*path /= fmt::format("{}.log"sv, Plugin::NAME);
 		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 #endif
-		//
-		const auto level = static_cast<spdlog::level::level_enum>(hdt::g_logLevel);
 
-		//
+#ifndef NDEBUG
+		const auto level = spdlog::level::trace;
+#else
+		const auto level = spdlog::level::info;
+#endif
+
 		auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 		log->set_level(level);
 		log->flush_on(level);
-
+		
 		spdlog::set_default_logger(std::move(log));
 		spdlog::set_pattern("%g(%#): [%^%l%$] %v"s);
 	}
@@ -562,6 +561,19 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	}
 }
 
+extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() 
+{
+	SKSE::PluginVersionData v;
+
+	v.PluginVersion(Plugin::VERSION);
+	v.PluginName(Plugin::NAME);
+	v.UsesAddressLibrary(true);
+	v.CompatibleVersions({ SKSE::RUNTIME_SSE_LATEST });
+	v.HasNoStructUse(true);
+
+	return v;
+}();
+
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
@@ -584,45 +596,34 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 	return true;
 }
 
-extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() 
-{
-	SKSE::PluginVersionData v;
-
-	v.PluginVersion(Plugin::VERSION);
-	v.PluginName(Plugin::NAME);
-	v.UsesAddressLibrary(true);
-	v.CompatibleVersions({ SKSE::RUNTIME_SSE_LATEST });
-	v.HasNoStructUse(true);
-
-	return v;
-}();
-
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-#ifndef NDEBUG
+// #ifndef NDEBUG
 	auto start = std::chrono::high_resolution_clock::now();
-
 	while (!IsDebuggerPresent()) 
 	{
+		// avoid spam
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		// break after 15 seconds of idle.
-		if (std::chrono::high_resolution_clock::now() - start > std::chrono::seconds(15))
+		if (std::chrono::high_resolution_clock::now() - start > std::chrono::seconds(15)) 
 		{
 			break;
 		}
 	}
-#endif
+// #endif
 
-	//
-	hdt::loadConfig();
-
-	//
 	InitializeLog();
 	logger::info("{} v{}"sv, Plugin::NAME, Plugin::VERSION.string());
 
+	//
 	SKSE::Init(a_skse);
+	SKSE::AllocTrampoline(128);
+
+	//
+	hdt::loadConfig();
 	
+	//
 	const auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener("SKSE", MessageHandler)) 
 	{
@@ -632,33 +633,26 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	//
 	Events::Sources::FrameEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
 	Events::Sources::FrameEventSource::GetSingleton()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
-	
-	//
 	Events::Sources::FrameSyncEventSource::GetSingleton()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
-
-	//
 	Events::Sources::ShutdownEventEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
 	Events::Sources::ShutdownEventEventSource::GetSingleton()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
-
-	//
 	Events::Sources::ArmorAttachEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
-	
-	//
 	Events::Sources::ArmorDetachEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
-	
-	//
 	Events::Sources::SkinSingleHeadGeometryEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
-	
-	//
 	Events::Sources::SkinAllHeadGeometryEventSource::GetSingleton()->AddEventSink(hdt::ActorManager::instance());
 	
-	//
-	SKSE::GetCameraEventSource()->AddEventSink(hdt::SkyrimPhysicsWorld::get());
-	
-	//
-	hdt::g_pluginInterface.init(a_skse);
+	auto cameraEventSource = SKSE::GetCameraEventSource();
+	if (cameraEventSource)
+	{
+		cameraEventSource->AddEventSink(hdt::SkyrimPhysicsWorld::get());
+	}
 
-	//
+	auto papyrusInterface = SKSE::GetPapyrusInterface();
+	if (papyrusInterface)
+	{
+		papyrusInterface->Register(hdt::Register);
+	}
+
 	auto unusedCommand = RE::SCRIPT_FUNCTION::LocateConsoleCommand("ShowRenderPasses");
 	if (unusedCommand)
 	{
@@ -676,10 +670,8 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		unusedCommand->executeFunction = SMPDebug_Execute;
 		unusedCommand->editorFilter = 0;
 	}
-
-	//
-	hdt::papyrus::RegisterAllFunctions(SKSE::GetPapyrusInterface());
 	
+	//
 	if (hdt::SkyrimPhysicsWorld::get()->m_enableWind) 
 	{
 		logger::info("Wind enabled");
