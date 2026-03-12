@@ -26,12 +26,15 @@ namespace Hooks
 			BSFaceGenNiNode__vtbl.write_vfunc(0x3E, SkinAllGeometry__Hook);
 
 			//
-			ApplyBoneLimitFix();
+			REL::Relocation<uintptr_t> hookAddress1{ REL::RelocationID(24223, 24727, 0x372BD0), REL::VariantOffset(0x46A, 0x4F3, 0x4D4) };  // 1403632D0, 1403BBE00, 0x140372BD0
+			trampoline.write_call<5>(hookAddress1.address(), sub_14036AA50);;
 
 			//
 			logger::debug("...success");
 		}
 	public:
+		static void sub_14036AA50(RE::BSFaceGenNiNode* const a_this);
+
 		static void ProcessHeadPart(RE::BSFaceGenNiNode* const, RE::BGSHeadPart*, RE::NiNode*, bool);
 		static void SkinAllGeometryCalls(RE::BSFaceGenNiNode* const, RE::NiNode*, bool);
 		static void SkinSingleGeometry__Hook(RE::BSFaceGenNiNode* const, RE::NiNode*, RE::BSGeometry*, bool);

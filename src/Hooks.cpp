@@ -3,9 +3,6 @@
 #include "Hooks.h"
 #include "Events.h"
 
-//
-#include <xbyak/xbyak.h>
-
 namespace Hooks
 {
 	void BSFaceGenNiNodeHooks::ProcessHeadPart(RE::BSFaceGenNiNode* const a_this, RE::BGSHeadPart* headPart, RE::NiNode* a_skeleton, bool a_unk)
@@ -174,47 +171,58 @@ namespace Hooks
 		}
 	}
 
-	void BSFaceGenNiNodeHooks::ApplyBoneLimitFix()
+	void BSFaceGenNiNodeHooks::sub_14036AA50(RE::BSFaceGenNiNode* a_this)
 	{
-		REL::Relocation<uintptr_t> GeometrySkinningBoneFix{ REL::VariantID(24330, 24836, 0x37ADD0), REL::VariantOffset(0x58, 0x75, 0x58) };
-
-		struct BoneLimitFix :
-			public Xbyak::CodeGenerator
+		RE::BSVisit::TraverseScenegraphGeometries(a_this, [&](RE::BSGeometry* a_geometry) -> RE::BSVisit::BSVisitControl 
 		{
-			BoneLimitFix(uintptr_t a_returnAddr) :
-				Xbyak::CodeGenerator()
-			{
-				Xbyak::Label ret;
+			auto tri = a_geometry->AsTriShape();
+			if (!tri) {
+				return RE::BSVisit::BSVisitControl::kContinue;
+			}
 
-				if (REL::Module::IsSE()) {
-					mov(esi, ptr[rax + 0x58]);
-					cmp(esi, 9);
-					jl(ret);
-					mov(esi, 8);
-				} else {
-					mov(ebp, ptr[rax + 0x58]);
-					cmp(ebp, 9);
-					jl(ret);
-					mov(ebp, 8);
+			auto fmd = tri->GetExtraData<RE::BSFaceGenModelExtraData>("FMD");
+			if (!fmd) {
+				return RE::BSVisit::BSVisitControl::kContinue;
+			}
+
+			auto skin = tri->GetGeometryRuntimeData().skinInstance.get();
+			if (!skin) {
+				return RE::BSVisit::BSVisitControl::kContinue;
+			}
+
+			auto skinData = skin->skinData.get();
+			if (!skinData) {
+				return RE::BSVisit::BSVisitControl::kContinue;
+			}
+
+			uint32_t boneCount = skinData->bones;
+			if (boneCount == 0) {
+				return RE::BSVisit::BSVisitControl::kContinue;
+			}
+
+			if (boneCount >= 9) {
+				boneCount = 8;
+			}
+
+			auto bones = skin->bones;
+			if (!bones) {
+				return RE::BSVisit::BSVisitControl::kContinue;
+			}
+
+			for (uint32_t i = 0; i < boneCount; ++i) {
+				auto bone = bones[i];
+				if (!bone) {
+					continue;
 				}
 
-				//
-				L(ret);
-				jmp(ptr[rip]);
-				dq(a_returnAddr);
+				// sub_478530 is just a wrapper that does fmd->bones[i] = bone->name;
+				fmd->bones[i] = bone->name;
 			}
-		};
 
-		//
-		BoneLimitFix code(GeometrySkinningBoneFix.address() + 7);
-
-		//
-		auto& localTrampoline = SKSE::GetTrampoline();
-
-		//
-		localTrampoline.write_branch<5>(GeometrySkinningBoneFix.address(), localTrampoline.allocate(code));
+			return RE::BSVisit::BSVisitControl::kContinue;
+		});
 	}
-	
+
 	void MainHooks::Update(RE::Main* const a_this)
 	{
 		//
