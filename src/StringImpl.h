@@ -4,7 +4,8 @@
 
 namespace hdt
 {
-	class StringImpl : public IString
+	class StringImpl : 
+		public IString
 	{
 	public:
 		StringImpl(size_t hash, std::string&& str);
@@ -32,7 +33,7 @@ namespace hdt
 		{
 		public:
 			StringImpl* get(size_t hash, std::string&& str);
-			void clean();
+			void        clean();
 		protected:
 			std::vector<RE::BSTSmartPointer<StringImpl>> m_list;
 			std::mutex									 m_lock;

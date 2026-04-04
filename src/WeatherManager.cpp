@@ -31,24 +31,18 @@ static inline size_t randomGeneratorLowMoreProbable(size_t lowermin, size_t lowe
 {
 	std::mt19937 rng;
 	rng.seed(std::random_device()());
-
 	std::uniform_int_distribution<std::mt19937::result_type> dist(1, probability);
 
 	if (dist(rng) == 1)
 	{
-		//higher
 		rng.seed(std::random_device()());
-
 		std::uniform_int_distribution<std::mt19937::result_type> distir(static_cast<uint32_t>(highermin), static_cast<uint32_t>(highermax));
-
 		return distir(rng);
 	}
 	else
 	{
 		rng.seed(std::random_device()());
-
 		std::uniform_int_distribution<std::mt19937::result_type> distir(static_cast<uint32_t>(lowermin), static_cast<uint32_t> (lowermax));
-
 		return distir(rng);
 	}
 }
@@ -171,7 +165,6 @@ void hdt::WeatherCheck()
 		else
 		{
 			world->setWind(RE::NiPoint3{ 0,0,0 }, 0, 1); // remove wind immediately
-			//LOG("Sky is null. waiting for 5 seconds.");
 			Sleep(5000);
 		}
 	}

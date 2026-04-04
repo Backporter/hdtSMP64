@@ -2,23 +2,15 @@
 #include "dhdtOverrideManager.h"
 #include "hdtSkyrimPhysicsWorld.h"
 
-bool RegisterFuncs(RE::BSScript::IVirtualMachine* registry)
+bool hdt::Register(RE::BSScript::IVirtualMachine* vm)
 {
-	//
-	registry->RegisterFunction("ReloadPhysicsFile", "DynamicHDT", hdt::papyrus::ReloadPhysicsFile);
-	registry->RegisterFunction("SwapPhysicsFile", "DynamicHDT", hdt::papyrus::SwapPhysicsFile);
-	registry->RegisterFunction("QueryCurrentPhysicsFile", "DynamicHDT", hdt::papyrus::QueryCurrentPhysicsFile);
+	vm->RegisterFunction("ReloadPhysicsFile", "DynamicHDT", hdt::papyrus::ReloadPhysicsFile);
+	vm->RegisterFunction("SwapPhysicsFile", "DynamicHDT", hdt::papyrus::SwapPhysicsFile);
+	vm->RegisterFunction("QueryCurrentPhysicsFile", "DynamicHDT", hdt::papyrus::QueryCurrentPhysicsFile);
 
-	//
 	return true;
 }
 
-bool hdt::papyrus::RegisterAllFunctions(const SKSE::PapyrusInterface* a_papy_intfc)
-{
-	return a_papy_intfc->Register(RegisterFuncs);
-}
-
-//Some private/protected members are changed to public so that these functions can access them externally.
 bool hdt::papyrus::ReloadPhysicsFile(RE::StaticFunctionTag*, RE::Actor* on_actor, RE::TESObjectARMA* on_item, RE::BSFixedString physics_file_path, bool persist, bool verbose_log)
 {
 	if (!(on_actor && on_item)) 
@@ -98,16 +90,14 @@ RE::BSFixedString hdt::papyrus::QueryCurrentPhysicsFile(RE::StaticFunctionTag*, 
 bool hdt::papyrus::impl::ReloadPhysicsFileImpl(uint32_t on_actor_formID, uint32_t on_item_formID, std::string physics_file_path, bool persist, bool verbose_log)
 {
 	const auto& AM = hdt::ActorManager::instance();
-
 	auto& skeletons = AM->getSkeletons();
-
 	bool character_found = false, armor_addon_found = false, succeeded = false;
-
 	std::string old_physics_file_path;
 
 	for (auto& skeleton : skeletons) 
 	{
-		if (succeeded) {
+		if (succeeded) 
+		{
 			break;
 		}
 
@@ -117,11 +107,9 @@ bool hdt::papyrus::impl::ReloadPhysicsFileImpl(uint32_t on_actor_formID, uint32_
 		}
 
 		auto owner = skeleton.skeleton->GetUserData();
-
 		if (owner && owner->formID == on_actor_formID) 
 		{
 			character_found = true;
-
 			auto& armors = skeleton.getArmors();
 
 			for (auto& armor : armors) 
@@ -137,10 +125,8 @@ bool hdt::papyrus::impl::ReloadPhysicsFileImpl(uint32_t on_actor_formID, uint32_
 				}
 
 				std::string armorName(armor.armorWorn->name);
-
 				char buffer[16];
 				sprintf_s(buffer, "%08X", on_item_formID);
-
 				if (armorName.find(buffer) != std::string::npos) 
 				{
 					armor_addon_found = true;
@@ -174,7 +160,6 @@ bool hdt::papyrus::impl::ReloadPhysicsFileImpl(uint32_t on_actor_formID, uint32_
 					hdt::SkyrimPhysicsWorld::get()->suspendSimulationUntilFinished([&]() 
 					{
 						system = SkyrimSystemCreator().createOrUpdateSystem(skeleton.npc.get(), armor.armorWorn.get(), &armor.physicsFile, std::move(armor.renameMap), armor.m_physics.get());
-
 						if (!system) 
 						{
 							if (armor.hasPhysics()) 
@@ -185,14 +170,12 @@ bool hdt::papyrus::impl::ReloadPhysicsFileImpl(uint32_t on_actor_formID, uint32_
 						else 
 						{
 							system->block_resetting = true;
-
 							if (armor.hasPhysics()) 
 							{
 								util::transferCurrentPosesBetweenSystems(armor.m_physics.get(), system.get());
 							}
 
 							armor.setPhysics(system, true);
-
 							system->block_resetting = false;
 						}
 					});
@@ -231,9 +214,7 @@ bool hdt::papyrus::impl::ReloadPhysicsFileImpl(uint32_t on_actor_formID, uint32_
 bool hdt::papyrus::impl::SwapPhysicsFileImpl(uint32_t on_actor_formID, std::string old_physics_file_path, std::string new_physics_file_path, bool persist, bool verbose_log)
 {
 	const auto& AM = hdt::ActorManager::instance();
-
 	auto& skeletons = AM->getSkeletons();
-
 	bool character_found = false, armor_addon_found = false, succeeded = false;
 
 	for (auto& skeleton : skeletons) 
@@ -249,11 +230,9 @@ bool hdt::papyrus::impl::SwapPhysicsFileImpl(uint32_t on_actor_formID, std::stri
 		}
 
 		auto owner = skeleton.skeleton->GetUserData();
-
 		if (owner && owner->formID == on_actor_formID) 
 		{
 			character_found = true;
-
 			auto& armors = skeleton.getArmors();
 
 			for (auto& armor : armors) 
@@ -265,7 +244,7 @@ bool hdt::papyrus::impl::SwapPhysicsFileImpl(uint32_t on_actor_formID, std::stri
 				{
 					armor_addon_found = true;
 
-					//Force replacing and reloading. This could lead to assess violation
+					// Force replacing and reloading. This could lead to assess violation
 					try 
 					{
 						if (armor.physicsFile.first == std::string(new_physics_file_path)) 
@@ -299,13 +278,16 @@ bool hdt::papyrus::impl::SwapPhysicsFileImpl(uint32_t on_actor_formID, std::stri
 					{
 						system = SkyrimSystemCreator().createOrUpdateSystem(skeleton.npc.get(), armor.armorWorn.get(), &armor.physicsFile, std::move(armor.renameMap), armor.m_physics.get());
 
-						if (!system) {
-							if (armor.hasPhysics()) {
+						if (!system) 
+						{
+							if (armor.hasPhysics()) 
+							{
 								armor.clearPhysics();
 							}
-						} else {
+						} 
+						else 
+						{
 							system->block_resetting = true;
-
 							if (armor.hasPhysics()) 
 							{
 								util::transferCurrentPosesBetweenSystems(armor.m_physics.get(), system.get());
@@ -349,11 +331,8 @@ bool hdt::papyrus::impl::SwapPhysicsFileImpl(uint32_t on_actor_formID, std::stri
 std::string hdt::papyrus::impl::QueryCurrentPhysicsFileImpl(uint32_t on_actor_formID, uint32_t on_item_formID, bool verbose_log)
 {
 	const auto& AM = hdt::ActorManager::instance();
-
 	auto& skeletons = AM->getSkeletons();
-
 	bool character_found = false, armor_addon_found = false, succeeded = false;
-
 	std::string physics_file_path;
 
 	for (auto& skeleton : skeletons) 
@@ -369,11 +348,9 @@ std::string hdt::papyrus::impl::QueryCurrentPhysicsFileImpl(uint32_t on_actor_fo
 		}
 
 		auto owner = skeleton.skeleton->GetUserData();
-
 		if (owner && owner->formID == on_actor_formID) 
 		{
 			character_found = true;
-
 			auto& armors = skeleton.getArmors();
 
 			for (auto& armor : armors) 

@@ -37,6 +37,7 @@ namespace hdt
 		int ret = strtol(str.c_str(), &end, radix);
 		if (end != str.c_str() + str.length())
 			throw std::string("not a int value");
+
 		return ret;
 	}
 
@@ -44,24 +45,30 @@ namespace hdt
 	{
 		if (str == "true" || str == "1")
 			return true;
+
 		if (str == "false" || str == "0")
 			return false;
+
 		throw std::string("not a boolean");
 	}
 
 	bool XMLReader::Inspect()
 	{
-		if (Base::GetInspected() == Inspected::EmptyElementTag && isEmptyStart)
+		if (Inspector<Xml::Encoding::Utf8Writer>::GetInspected() == Inspected::EmptyElementTag && isEmptyStart)
 			return isEmptyStart = false, true;
-		if (!Base::Inspect()) return false;
-		if (Base::GetInspected() == Inspected::EmptyElementTag)
+
+		if (!Inspector<Xml::Encoding::Utf8Writer>::Inspect()) 
+			return false;
+
+		if (Inspector<Xml::Encoding::Utf8Writer>::GetInspected() == Inspected::EmptyElementTag)
 			isEmptyStart = true;
+
 		return true;
 	}
 
 	Xml::Inspected XMLReader::GetInspected()
 	{
-		auto ret = Base::GetInspected();
+		auto ret = Inspector<Xml::Encoding::Utf8Writer>::GetInspected();
 		if (ret == Inspected::EmptyElementTag)
 		{
 			if (isEmptyStart) return Inspected::StartTag;

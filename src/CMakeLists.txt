@@ -541,7 +541,6 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/FrameworkUtils.h"
 	"${SOURCE_DIR}/NetImmerseUtils.h"
 	"${SOURCE_DIR}/StringImpl.cpp"
-	"${SOURCE_DIR}/main.h"
 	"${SOURCE_DIR}/main.cpp"
 	"${SOURCE_DIR}/PCH.h"
 )

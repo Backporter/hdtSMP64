@@ -19,11 +19,11 @@ namespace hdt
 	// e_CPURefactored is an alternate CPU one, modified for conversion to GPU but still using CPU in practice.
 	enum CollisionCheckAlgorithmType
 	{
-		e_CPU,
-		e_CPURefactored,
+		kCPU,
+		kCPURefactored,
 		// Remove if useless
 #ifndef CUDA
-		e_CUDA
+		kCUDA
 #endif // !CUDA
 	};
 
@@ -368,13 +368,13 @@ namespace hdt
 	// Dispatcher specialization for sphere-triangle collisions on CUDA. Sphere-sphere collisions will
 	// continue to use the CPU dispatcher. Doesn't actually do anything yet (and will fail to compile).
 	template <bool SwapResults>
-	struct CollisionCheckDispatcher<PerTriangleShape, SwapResults, e_CUDA>
+	struct CollisionCheckDispatcher<PerTriangleShape, SwapResults, kCUDA>
 		: public CollisionCheckBase2<PerTriangleShape, SwapResults>
 	{};
 #endif
 
 	// Finally, CollisionCheckAlgorithm does the full check between collider trees.
-	template <typename T, bool SwapResults = false, CollisionCheckAlgorithmType Algorithm = e_CPURefactored>
+	template <typename T, bool SwapResults = false, CollisionCheckAlgorithmType Algorithm = kCPURefactored>
 	struct CollisionCheckAlgorithm : public CollisionCheckDispatcher<T, SwapResults, Algorithm>
 	{
 		template <typename... Ts>
@@ -384,7 +384,7 @@ namespace hdt
 
 		int operator()()
 		{
-			static_assert(Algorithm != e_CPU, "Old CPU algorithm specialization missing");
+			static_assert(Algorithm != kCPU, "Old CPU algorithm specialization missing");
 
 			std::vector<std::pair<ColliderTree*, ColliderTree*>> pairs;
 			pairs.reserve(this->c0->colliders.size() + this->c1->colliders.size());
@@ -464,7 +464,7 @@ namespace hdt
 
 	// Old algorithm - lower memory use, possibly faster (for CPU), but not at all suited to GPU processing
 	template <typename T, bool SwapResults>
-	struct CollisionCheckAlgorithm<T, SwapResults, e_CPU> : public CollisionChecker<T, SwapResults>
+	struct CollisionCheckAlgorithm<T, SwapResults, kCPU> : public CollisionChecker<T, SwapResults>
 	{
 		template <typename... Ts>
 		CollisionCheckAlgorithm(Ts&&... ts)
