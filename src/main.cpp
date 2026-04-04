@@ -598,7 +598,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-// #ifndef NDEBUG
+#ifndef NDEBUG
 	auto start = std::chrono::high_resolution_clock::now();
 	while (!IsDebuggerPresent()) 
 	{
@@ -611,7 +611,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 			break;
 		}
 	}
-// #endif
+#endif
 
 	InitializeLog();
 	logger::info("{} v{}"sv, Plugin::NAME, Plugin::VERSION.string());
